@@ -1,11 +1,19 @@
 import json
 from math import sqrt
+from pathlib import Path
 
 
 def load_config() -> json:
-    """Loads and returns the data from config.json."""
+    """
+    Loads and returns the data from config.json by determining its path
+    relative to the calling script (e.g., app/utils.py).
+    """
+    current_dir = Path(__file__).resolve().parent
+
+    config_path = current_dir / "config.json"
+
     try:
-        with open("config.json", "r") as f:
+        with open(config_path, "r") as f:
             return json.load(f)
     except FileNotFoundError:
         return None

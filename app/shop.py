@@ -36,7 +36,7 @@ class Shop:
         """
         Prints a formatted purchase receipt using the current time.
         """
-        now = datetime.datetime(2021, 1, 4, 12, 33, 41)
+        now = datetime.datetime.now()
         timestamp = now.strftime("%d/%m/%Y %H:%M:%S")
 
         print(f"\nDate: {timestamp}")
