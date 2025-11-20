@@ -6,10 +6,12 @@ class Shop:
     Represents a shop where customers can buy products.
     """
 
-    def __init__(self,
-                 name: str,
-                 location: list[int],
-                 products: dict[str, float]) -> None:
+    def __init__(
+        self,
+        name: str,
+        location: list[int],
+        products: dict[str, float]
+    ) -> None:
         """
         :param name: Shop's name.
         :param location: Shop's [x, y] location.
@@ -27,12 +29,13 @@ class Shop:
         for product, quantity in product_cart.items():
             price = self.products.get(product, 0.0)
             total_cost += price * quantity
-
         return total_cost
 
-    def print_receipt(self,
-                      customer_name: str,
-                      product_cart: dict[str, int]) -> float:
+    def print_receipt(
+        self,
+        customer_name: str,
+        product_cart: dict[str, int]
+    ) -> float:
         """
         Prints a formatted purchase receipt using the current time.
         """
@@ -43,11 +46,11 @@ class Shop:
         print(f"Thanks, {customer_name}, for your purchase!")
         print("You have bought:")
 
-        total_cost = 0.0
+        total_cost = self.get_products_cost(product_cart)
+
         for product, quantity in product_cart.items():
             price = self.products.get(product, 0.0)
             cost = price * quantity
-            total_cost += cost
 
             cost_str = f"{cost:.2f}".rstrip("0").rstrip(".")
             print(f"{quantity} {product}s for {cost_str} dollars")

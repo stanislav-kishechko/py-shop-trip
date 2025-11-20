@@ -8,13 +8,15 @@ class Customer:
     Represents a customer who wants to make a shopping trip.
     """
 
-    def __init__(self,
-                 name: str,
-                 product_cart: dict[str, int],
-                 location: list[int],
-                 money: float,
-                 car_data: dict,
-                 fuel_price: float) -> None:
+    def __init__(
+        self,
+        name: str,
+        product_cart: dict[str, int],
+        location: list[int],
+        money: float,
+        car_data: dict,
+        fuel_price: float
+    ) -> None:
         """
         :param name: Customer's name.
         :param product_cart: Products and quantities to buy.
@@ -35,30 +37,43 @@ class Customer:
         """
         Calculates the fuel cost for a given distance.
         """
-        # Fuel needed = (Distance / 100 km) * Fuel consumption (L/100km)
         fuel_needed = (distance / 100.0) * self.car.fuel_consumption
         return fuel_needed * self.fuel_price
+
+    def _compute_trip_costs(self, shop: Shop) -> dict:
+        """
+        Computes all distances and fuel costs needed for the trip.
+        Shared logic for both calculate_total_trip_cost and ride_to_shop.
+        """
+        distance_to_shop = calculate_distance(
+            self.initial_location,
+            shop.location
+        )
+
+        fuel_cost_one_way = self.calculate_fuel_cost(distance_to_shop)
+        fuel_cost_home = fuel_cost_one_way  # same distance back
+
+        products_cost = shop.get_products_cost(self.product_cart)
+
+        return {
+            "distance": distance_to_shop,
+            "fuel_cost_one_way": fuel_cost_one_way,
+            "fuel_cost_home": fuel_cost_home,
+            "products_cost": products_cost,
+        }
 
     def calculate_total_trip_cost(self, shop: Shop) -> float:
         """
         Calculates the total cost of the round trip (fuel to
             shop + products + fuel back).
         """
-        distance_to_shop = calculate_distance(
-            self.initial_location,
-            shop.location
+        costs = self._compute_trip_costs(shop)
+
+        total_cost = (
+            costs["fuel_cost_one_way"]
+            + costs["products_cost"]
+            + costs["fuel_cost_home"]
         )
-        fuel_cost_one_way = self.calculate_fuel_cost(distance_to_shop)
-
-        products_cost = shop.get_products_cost(self.product_cart)
-
-        distance_home = calculate_distance(
-            shop.location,
-            self.initial_location
-        )
-        fuel_cost_home = self.calculate_fuel_cost(distance_home)
-
-        total_cost = fuel_cost_one_way + products_cost + fuel_cost_home
 
         return round(total_cost, 2)
 
@@ -68,27 +83,17 @@ class Customer:
         """
         print(f"{self.name} rides to {shop.name}")
 
-        distance_to_shop = calculate_distance(
-            self.initial_location,
-            shop.location
-        )
-        fuel_cost_one_way = self.calculate_fuel_cost(distance_to_shop)
+        costs = self._compute_trip_costs(shop)
 
+        self.money -= costs["fuel_cost_one_way"]
         self.location = shop.location[:]
-        self.money -= fuel_cost_one_way
 
         products_cost = shop.print_receipt(self.name, self.product_cart)
         self.money -= products_cost
 
         print(f"{self.name} rides home")
 
-        distance_home = calculate_distance(
-            shop.location,
-            self.initial_location
-        )
-        fuel_cost_home = self.calculate_fuel_cost(distance_home)
-
+        self.money -= costs["fuel_cost_home"]
         self.location = self.initial_location[:]
-        self.money -= fuel_cost_home
 
         print(f"{self.name} now has {self.money:.2f} dollars\n")
